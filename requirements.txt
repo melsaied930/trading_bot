@@ -1,0 +1,18 @@
+# Core Libraries
+pandas
+requests
+python-dotenv
+
+# Interactive Brokers API
+ib_insync
+
+# Logging and System Monitoring
+logging
+
+# For Advanced Data Processing (Optional)
+numpy
+scipy
+
+# For Testing and Development (Optional)
+pytest
+pytest-mock
