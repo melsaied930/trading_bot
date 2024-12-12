@@ -14,3 +14,13 @@ START_BALANCE = float(os.getenv("START_BALANCE", 10000))
 # Validate environment variables
 if not API_KEY:
     raise ValueError("API_KEY is not set in .env file")
+
+
+
+
+
+settings = {
+    "STRATEGY_MODULE": "strategies.test_strategy",  # Path to the Strategy
+    "STRATEGY_CLASS": "TestStrategy"                # Class Name
+}
+
