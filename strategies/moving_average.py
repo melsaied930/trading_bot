@@ -1,16 +1,27 @@
-import pandas as pd
-from strategies.base_strategy import BaseStrategy
+import time
 
-class MovingAverageStrategy(BaseStrategy):
-    def __init__(self, short_window=5, long_window=20):
-        self.short_window = short_window
-        self.long_window = long_window
+class TestStrategy:
+    def __init__(self, buy_interval=10, sell_delay=5):
+        self.last_buy_time = 0
+        self.buy_interval = buy_interval  # Buy every 10 seconds
+        self.sell_delay = sell_delay  # Sell after 5 seconds
+        self.holding_position = False
 
-    def generate_signals(self, data: pd.DataFrame):
-        data['SMA_Short'] = data['close'].rolling(window=self.short_window).mean()
-        data['SMA_Long'] = data['close'].rolling(window=self.long_window).mean()
+    def make_decision(self):
+        current_time = time.time()
 
-        # Ensure conversion is done using Pandas DataFrame structure
-        data['Signal'] = pd.Series(data['SMA_Short'] > data['SMA_Long'], index=data.index).astype(int)
+        # Buy Logic: Every 10 seconds
+        if not self.holding_position and (current_time - self.last_buy_time >= self.buy_interval):
+            self.last_buy_time = current_time
+            self.holding_position = True
+            print("Decision: BUY")
+            return "BUY"
 
-        return data
+        # Sell Logic: Sell 5 seconds after the last buy
+        if self.holding_position and (current_time - self.last_buy_time >= self.sell_delay):
+            self.holding_position = False
+            print("Decision: SELL")
+            return "SELL"
+
+        print("Decision: HOLD")
+        return "HOLD"

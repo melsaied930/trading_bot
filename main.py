@@ -1,19 +1,27 @@
-from config.config import IBKR_HOST, IBKR_PORT, CLIENT_ID, START_BALANCE
 from data.data_fetcher import DataFetcher
-from utils.logger import setup_logger
+from brokers.broker_api import BrokerAPI
+import time
 
-logger = setup_logger()
-
-def main():
-    logger.info("Starting trading bot...")
-
-    # Initialize DataFetcher with correct host and port
-    try:
-        data_fetcher = DataFetcher(IBKR_HOST, IBKR_PORT, CLIENT_ID)
-        market_data = data_fetcher.fetch_live_data("AAPL")
-        logger.info(f"Market data fetched: {market_data}")
-    except Exception as e:
-        logger.error(f"Failed to start trading bot: {e}")
+from strategies.moving_average import TestStrategy
 
 if __name__ == "__main__":
-    main()
+    fetcher = DataFetcher()
+    strategy = TestStrategy(buy_interval=10, sell_delay=5)
+    broker = BrokerAPI()
+
+    while True:
+        try:
+            # Fetch live market data
+            data = fetcher.fetch_live_data("AAPL")
+            print(f"Fetched Data: {data}")
+
+            # Make trading decision
+            decision = strategy.make_decision()
+
+            if decision in ["BUY", "SELL"]:
+                broker.place_order(data['symbol'], decision, 100, f"Order-{int(time.time())}")
+                print(f"Order Executed: {decision} at {data['price']}")
+
+            time.sleep(1)
+        except Exception as e:
+            print(f"Error: {e}")

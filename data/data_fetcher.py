@@ -1,36 +1,31 @@
 from ib_insync import IB, Stock
-import pandas as pd
+import time
 
 class DataFetcher:
-    def __init__(self, ibkr_host="127.0.0.1", ibkr_port=7497, client_id=1):
+    def __init__(self, ibkr_host="127.0.0.1", ibkr_port=7497, client_id=None):
         self.ib = IB()
-        try:
-            print(f"Connecting to {ibkr_host}:{ibkr_port} with clientId {client_id}...")
-            self.ib.connect(ibkr_host, ibkr_port, clientId=client_id)
-            print("Connection successful!")
-        except Exception as e:
-            print(f"API connection failed: {e}")
-            raise
+        if client_id is None:
+            client_id = int(time.time() % 10000)  # Use a dynamic client ID
+        print(f"Connecting with clientId: {client_id}")
+
+        if not self.ib.connect(ibkr_host, ibkr_port, clientId=client_id, timeout=60):
+            raise ConnectionError("IBKR API connection failed.")
 
     def fetch_live_data(self, symbol="AAPL"):
-        # Correct way to define a stock contract
         contract = Stock(symbol, "SMART", "USD")
         self.ib.qualifyContracts(contract)
 
-        # Request market data
         market_data = self.ib.reqMktData(contract, "", False, False)
-        self.ib.sleep(2)
+        self.ib.sleep(1)
 
-        # Ensure valid market data is returned
-        if market_data.last:
-            return pd.DataFrame(
-                [{
-                    "symbol": symbol,
-                    "price": market_data.last,
-                    "bid": market_data.bid,
-                    "ask": market_data.ask,
-                    "time": market_data.time
-                }]
-            )
+        if market_data.close or market_data.last:
+            price = market_data.close or market_data.last
+            return {
+                "symbol": symbol,
+                "price": price,
+                "bid": market_data.bid,
+                "ask": market_data.ask,
+                "time": market_data.time
+            }
         else:
-            raise Exception("Market data not available")
+            raise ValueError(f"No market data available for {symbol}")
