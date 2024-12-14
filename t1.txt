@@ -1,0 +1,48 @@
+
+Order Filled: BUY 10 of AAPL at 247.8
+Order Filled: SELL 10 of AAPL at 247.9
+Order Filled: BUY 10 of AAPL at 247.92
+Order Filled: SELL 10 of AAPL at 247.9
+Order Filled: BUY 10 of AAPL at 247.87
+Order Filled: BUY 10 of AAPL at 247.88
+Order Filled: BUY 10 of AAPL at 247.91
+Order Filled: BUY 10 of AAPL at 247.87
+Order Filled: BUY 10 of AAPL at 247.9
+Order Filled: BUY 10 of AAPL at 247.91
+Order Filled: BUY 10 of AAPL at 247.99
+Order Filled: BUY 10 of AAPL at 247.97
+Order Filled: BUY 10 of AAPL at 247.91
+Order Filled: SELL 10 of AAPL at 248.0
+Order Filled: BUY 10 of AAPL at 248.07
+Order Filled: BUY 10 of AAPL at 247.81
+Order Filled: BUY 10 of AAPL at 247.92
+Order Filled: BUY 10 of AAPL at 247.97
+Order Filled: BUY 10 of AAPL at 247.99
+Order Filled: SELL 10 of AAPL at 248.0
+Order Filled: BUY 10 of AAPL at 248.01
+[DataFetcher] Waiting for next fetch interval...
+Data Fetch Error: "Missing required data keys: ['last_close', 'current_open']"
+[DataFetcher] Waiting for next fetch interval...
+Data Fetch Error: "Missing required data keys: ['last_close', 'current_open']"
+[DataFetcher] Waiting for next fetch interval...
+Data Fetch Error: "Missing required data keys: ['last_close', 'current_open']"
+[DataFetcher] Waiting for next fetch interval...
+Data Fetch Error: "Missing required data keys: ['last_close', 'current_open']"
+[DataFetcher] Waiting for next fetch interval...
+Data Fetch Error: "Missing required data keys: ['last_close', 'current_open']"
+[DataFetcher] Waiting for next fetch interval...
+Data Fetch Error: "Missing required data keys: ['last_close', 'current_open']"
+[DataFetcher] Waiting for next fetch interval...
+Data Fetch Error: "Missing required data keys: ['last_close', 'current_open']"
+Order Filled: BUY 10 of AAPL at 247.98
+Order Filled: BUY 10 of AAPL at 247.96
+Order Filled: BUY 10 of AAPL at 248.07
+Order Filled: BUY 10 of AAPL at 248.17
+Order Filled: BUY 10 of AAPL at 248.21
+Order Filled: BUY 10 of AAPL at 248.19
+Order Filled: BUY 10 of AAPL at 248.09
+Order Filled: BUY 10 of AAPL at 248.17
+Order Filled: BUY 10 of AAPL at 248.24
+Order Filled: BUY 10 of AAPL at 247.96
+Order Filled: BUY 10 of AAPL at 248.01
+Order Filled: BUY 10 of AAPL at 248.03

@@ -13,3 +13,13 @@ if __name__ == "__main__":
 
     except Exception as e:
         print(f"Failed to initialize: {e}")
+
+# from strategies.backtest_strategy import BacktestStrategy
+# from backtest.backtest_engine import BacktestEngine
+#
+# if __name__ == "__main__":
+#     strategy = BacktestStrategy()
+#     backtest_engine = BacktestEngine(strategy, data_file="data/historical_data.csv")
+#
+#     backtest_engine.load_data()  # Load historical prices
+#     backtest_engine.run_backtest()  # Start backtesting

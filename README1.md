@@ -176,6 +176,7 @@ def setup_logger():
 ---
 
 ### **9. `main.py` (Main Entry Point)**
+
 ```python
 from config.config import API_KEY, BROKER_URL, START_BALANCE
 from data.data_fetcher import DataFetcher
@@ -186,28 +187,30 @@ from utils.logger import setup_logger
 
 logger = setup_logger()
 
+
 def main():
-    logger.info("Starting trading bot...")
-    
-    # Initialize modules
-    data_fetcher = DataFetcher(API_KEY, BROKER_URL)
-    strategy = MovingAverageStrategy()
-    portfolio = Portfolio(START_BALANCE)
-    broker = BrokerAPI(API_KEY, BROKER_URL)
+   logger.info("Starting trading bot...")
 
-    # Fetch market data and generate signals
-    market_data = data_fetcher.fetch_live_data()
-    signals = strategy.generate_signals(market_data)
+   # Initialize modules
+   data_fetcher = DataFetcher(API_KEY, BROKER_URL)
+   strategy = MovingAverageStrategy()
+   portfolio = Portfolio(START_BALANCE)
+   broker = BrokerAPI(API_KEY, BROKER_URL)
 
-    # Execute trades based on signals
-    for index, row in signals.iterrows():
-        if row['Signal'] == 1:  # Buy signal
-            broker.place_order("BTC/USD", "BUY", 1, row['close'])
-            portfolio.update_position("BTC/USD", 1, row['close'], "BUY")
-            logger.info(f"Bought 1 BTC at {row['close']}")
+   # Fetch market data and generate signals
+   market_data = data_fetcher.fetch_live_data()
+   signals = strategy.generate_signals(market_data)
+
+   # Execute trades based on signals
+   for index, row in signals.iterrows():
+      if row['Signal'] == 1:  # Buy signal
+         broker.place_order("BTC/USD", "BUY", 1, row['close'])
+         portfolio.update_position("BTC/USD", 1, row['close'], "BUY")
+         logger.info(f"Bought 1 BTC at {row['close']}")
+
 
 if __name__ == "__main__":
-    main()
+   main()
 ```
 
 ---

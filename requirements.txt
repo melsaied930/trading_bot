@@ -1,20 +1,37 @@
-#requirements.txt
-
-# Core Libraries
-pandas
-requests
-python-dotenv
-
-# Interactive Brokers API
-ib_insync
-
-# Logging and System Monitoring
-logging
-
-# For Advanced Data Processing (Optional)
-numpy
-scipy
-
-# For Testing and Development (Optional)
-pytest
-pytest-mock
+beautifulsoup4==4.12.3
+certifi==2024.8.30
+charset-normalizer==3.4.0
+colorama==0.4.6
+eventkit==1.0.3
+frozendict==2.4.6
+html5lib==1.1
+ib-insync==0.9.86
+ibapi==9.81.1.post1
+idna==3.10
+iniconfig==2.0.0
+logging==0.4.9.6
+lxml==5.3.0
+multitasking==0.0.11
+nest-asyncio==1.6.0
+numpy==2.2.0
+packaging==24.2
+pandas==2.2.3
+peewee==3.17.8
+platformdirs==4.3.6
+pluggy==1.5.0
+pytest==8.3.4
+pytest-mock==3.14.0
+python-dateutil==2.9.0.post0
+python-dotenv==1.0.1
+pytz==2024.2
+requests==2.32.3
+scipy==1.14.1
+six==1.17.0
+soupsieve==2.6
+tabulate==0.9.0
+termcolor==2.5.0
+tzdata==2024.2
+urllib3==2.2.3
+webencodings==0.5.1
+websockets==14.1
+yfinance==0.2.50

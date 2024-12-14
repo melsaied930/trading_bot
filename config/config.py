@@ -19,8 +19,12 @@ if not API_KEY:
 
 
 
-settings = {
-    "STRATEGY_MODULE": "strategies.test_strategy",  # Path to the Strategy
-    "STRATEGY_CLASS": "TestStrategy"                # Class Name
-}
+# settings = {
+#     "STRATEGY_MODULE": "strategies.test_strategy",  # Path to the Strategy
+#     "STRATEGY_CLASS": "TestStrategy"                # Class Name
+# }
 
+settings = {
+    "STRATEGY_MODULE": "strategies.moving_average",  # Path to the Strategy
+    "STRATEGY_CLASS": "Strategy"                # Class Name
+}

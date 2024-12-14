@@ -48,17 +48,17 @@ class Strategy:
         self.fetcher = DataFetcher()
         self.broker = BrokerAPI()
         self.stock_symbol = "AAPL"
-        self.fetch_interval = 30  # Check every 30 seconds
-        self.price_history = [274.80]  # Start EMA from 274.80
-        self.current_ema = 274.80  # Set initial EMA to 274.80
-        self.current_position = None
-        self.quantity = 10
+        self.fetch_interval = 30  # Log every 30 seconds
+        self.price_history = []
 
     def fetch_live_data(self):
-        """Fetch live market data."""
+        """Fetch live market data every 30 seconds."""
         data = self.fetcher.fetch_live_data(self.stock_symbol)
 
-        # Validate fetched data structure
+        # Debug: Print fetched data structure
+        print(f"Fetched Data: {data}")
+
+        # Validate the fetched data structure
         if not isinstance(data, dict):
             raise KeyError("Fetched data is not a dictionary.")
 
@@ -70,38 +70,33 @@ class Strategy:
 
         return data
 
-    def calculate_ema(self, new_price, period=10):
-        """Calculate the EMA with the new price."""
-        multiplier = 2 / (period + 1)
-        self.current_ema = (new_price - self.current_ema) * multiplier + self.current_ema
-        return self.current_ema
-
-    def place_order(self, side, price, reason):
+    def place_order(self, symbol, side, price):
         """Place orders with the broker."""
         try:
             order_ref = f"Order-{int(time.time())}"
-            self.broker.place_order(self.stock_symbol, side, self.quantity, order_ref)
-            print(f"Order Executed: {side} {self.quantity} of {self.stock_symbol} at {price}")
-            self.log_transaction(side, price, reason)
+            self.broker.place_order(symbol, side, self.quantity, order_ref)
+            print(f"Order Executed: {side} {self.quantity} of {symbol} at {price}")
         except Exception as e:
             print(f"Order Placement Error: {e}")
 
-    def log_transaction(self, action, price, reason):
-        """Log transaction details."""
-        timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
-        print(f"[{timestamp}] Action: {action}, Quantity: {self.quantity}, Price: {price}, Reason: {reason}")
+    def calculate_ema(self, prices, period=21):
+        """Calculate the EMA for the prices list."""
+        if len(prices) < period:
+            return None  # Not enough data to calculate EMA
+        multiplier = 2 / (period + 1)
+        ema = prices[0]
+        for price in prices[1:]:
+            ema = (price - ema) * multiplier + ema
+        return ema
 
-    def make_decision(self, last_close, current_open):
-        """Make trading decisions based on the defined strategy."""
-        if last_close > self.current_ema and current_open > self.current_ema and self.current_position != "LONG":
-            self.place_order("BUY", current_open, "Above EMA 10")
-            self.current_position = "LONG"
-        elif last_close < self.current_ema and current_open < self.current_ema and self.current_position != "SHORT":
-            self.place_order("SELL", current_open, "Below EMA 10")
-            self.current_position = "SHORT"
+    def log_market_data(self, last_close, current_open, ema):
+        """Log market data details."""
+        timestamp = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+        ema_display = f"{ema:.2f}" if ema else "N/A"
+        print(f"[{timestamp}] Last Close: {last_close}, Current Open: {current_open}, EMA 21: {ema_display}")
 
     def run_bot(self):
-        """Execute trading strategy every 30 seconds."""
+        """Log close price, open price, and EMA 21 every 30 seconds."""
         while True:
             try:
                 # Fetch live market data
@@ -111,20 +106,17 @@ class Strategy:
 
                 # Update price history
                 self.price_history.append(last_close)
-                if len(self.price_history) > 10:
+                if len(self.price_history) > 21:
                     self.price_history.pop(0)
 
-                # Calculate updated EMA
-                updated_ema = self.calculate_ema(last_close)
+                # Calculate EMA
+                ema = self.calculate_ema(self.price_history)
 
-                # Make trading decision
-                self.make_decision(last_close, current_open)
-
-                print(f"Updated EMA 10: {updated_ema:.2f}")
+                # Log the market data
+                self.log_market_data(last_close, current_open, ema)
 
                 # Wait for the next fetch interval
                 time.sleep(self.fetch_interval)
-
             except KeyError as ke:
                 print(f"Data Fetch Error: {ke}")
             except Exception as e:

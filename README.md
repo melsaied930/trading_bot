@@ -16,287 +16,135 @@ This project is a fully functional trading bot built using Python. It integrates
 ```
 trading_bot/
 │
-├── config/
-│   └── config.py               # Configuration settings (API keys, DB config)
+├── README.md               # Project description
+├── config/                 # Configuration settings
+│   ├── __init__.py
+│   └── config.py
 │
-├── data/
-│   ├── data_fetcher.py         # Market data fetching logic
-│   └── historical_data.csv     # Local data storage (if needed)
+├── data/                   # Market data fetching logic
+│   ├── __init__.py
+│   └── data_fetcher.py
 │
-├── strategies/
-│   ├── base_strategy.py        # Abstract base class for strategies
-│   └── moving_average.py       # Example trading strategy implementation
+├── strategies/             # Trading strategy implementations
+│   ├── __init__.py
+│   ├── base_strategy.py
+│   ├── backtest_strategy.py
+│   └── moving_average.py
 │
-├── models/
-│   └── portfolio.py            # Portfolio management logic
+├── models/                 # Portfolio management logic
+│   ├── __init__.py
+│   └── portfolio.py
 │
-├── risk/
-│   └── risk_manager.py         # Risk management (stop-loss, take-profit)
+├── risk/                   # Risk management
+│   └── risk_manager.py
 │
-├── brokers/
-│   └── broker_api.py           # API wrapper for brokers/exchanges
+├── brokers/                # API wrapper for brokers/exchanges
+│   ├── __init__.py
+│   ├── broker_api.py
+│   └── verify_api_access.py
 │
-├── utils/
-│   ├── logger.py               # Custom logging configuration
-│   └── indicators.py           # Custom indicators (RSI, Bollinger Bands)
+├── utils/                  # Logging and indicators
+│   ├── __init__.py
+│   ├── indicators.py
+│   └── logger.py
 │
-├── main.py                     # Main entry point
-├── requirements.txt            # Dependencies
-├── README.md                   # Project description
-└── .env                        # Secret environment variables (API keys)
+├── main.py                 # Main entry point
+├── requirements.txt        # Dependencies
+└── .env                    # Secret environment variables
 ```
 
 ---
 
 # **Module Breakdown**
 
-### **1. `config/config.py` (Configuration Management)**
+### **1. Configuration Management (`config/`)**
 Manages API keys, broker URLs, and trading pairs.
 
-```python
-import os
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
-
-# IBKR Connection Details
-API_KEY = os.getenv("API_KEY")
-IBKR_HOST = os.getenv("IBKR_HOST", "127.0.0.1")
-IBKR_PORT = int(os.getenv("IBKR_PORT", 7497))
-CLIENT_ID = int(os.getenv("CLIENT_ID", 1))
-START_BALANCE = float(os.getenv("START_BALANCE", 10000))
-
-# Validate environment variables
-if not API_KEY:
-   raise ValueError("API_KEY is not set in .env file")
-
-```
-
----
-
-### **2. `data/data_fetcher.py` (Market Data Fetching)**
+### **2. Market Data Fetching (`data/`)**
 Connects to IBKR API and fetches live market data.
 
-```python
-from ib_insync import IB, Stock
-import pandas as pd
+### **3. Trading Strategies (`strategies/`)**
+Implements strategies such as moving average crossover.
 
-class DataFetcher:
-   def __init__(self, ibkr_host="127.0.0.1", ibkr_port=7497, client_id=1):
-      self.ib = IB()
-      try:
-         print(f"Connecting to {ibkr_host}:{ibkr_port} with clientId {client_id}...")
-         self.ib.connect(ibkr_host, ibkr_port, clientId=client_id)
-         print("Connection successful!")
-      except Exception as e:
-         print(f"API connection failed: {e}")
-         raise
-
-   def fetch_live_data(self, symbol="AAPL"):
-      contract = Stock(symbol, "SMART", "USD")
-      self.ib.qualifyContracts(contract)
-
-      # Use snapshot=False to avoid regulatory snapshot restriction
-      market_data = self.ib.reqMktData(contract, "", False, False)
-      self.ib.sleep(2)
-
-      if market_data.last:
-         return pd.DataFrame(
-            [{
-               "symbol": symbol,
-               "price": market_data.last,
-               "bid": market_data.bid,
-               "ask": market_data.ask,
-               "time": market_data.time
-            }]
-         )
-      else:
-         raise Exception(f"No market data available for {symbol}")
-
-```
-
----
-
-### **3. `strategies/moving_average.py` (Trading Strategy)**
-Implements a simple moving average trading strategy.
-
-```python
-import pandas as pd
-from strategies.base_strategy import BaseStrategy
-
-class MovingAverageStrategy(BaseStrategy):
-   def __init__(self, short_window=5, long_window=20):
-      self.short_window = short_window
-      self.long_window = long_window
-
-   def generate_signals(self, data: pd.DataFrame):
-      data['SMA_Short'] = data['close'].rolling(window=self.short_window).mean()
-      data['SMA_Long'] = data['close'].rolling(window=self.long_window).mean()
-
-      # Ensure conversion is done using Pandas DataFrame structure
-      data['Signal'] = pd.Series(data['SMA_Short'] > data['SMA_Long'], index=data.index).astype(int)
-
-      return data
-
-```
-
----
-
-### **4. `models/portfolio.py` (Portfolio Management)**
+### **4. Portfolio Management (`models/`)**
 Handles portfolio balances, holdings, and trade updates.
 
-```python
-class Portfolio:
-   def __init__(self, initial_balance):
-      self.balance = initial_balance
-      self.positions = {}  # Dictionary to track holdings
+### **5. Order Placement (`brokers/`)**
+Manages order placement using the broker API.
 
-   def update_position(self, symbol, amount, price, action):
-      if action == "BUY":
-         cost = amount * price
-         if cost <= self.balance:
-            self.positions[symbol] = self.positions.get(symbol, 0) + amount
-            self.balance -= cost
-         else:
-            raise ValueError("Not enough balance to buy")
-      elif action == "SELL":
-         if symbol in self.positions and self.positions[symbol] >= amount:
-            self.positions[symbol] -= amount
-            self.balance += amount * price
-         else:
-            raise ValueError("Not enough holdings to sell")
-      else:
-         raise ValueError("Invalid action specified")
+### **6. Risk Management (`risk/`)**
+Manages stop-loss, take-profit, and position sizing strategies.
 
-```
+### **7. Logging and Indicators (`utils/`)**
+Logs events and calculates trading indicators.
 
 ---
 
-### **5. `brokers/broker_api.py` (Order Placement)**
-Manages order placement using IBKR API.
+# **Package Management**
 
-```python
-from ib_insync import IB, Stock, MarketOrder
+### **1. Managing Dependencies**
+- All required packages are listed in `requirements.txt`.
+- Use the following command to install dependencies:
+  ```bash
+  pip install -r requirements.txt
+  ```
 
-class BrokerAPI:
-   def __init__(self, ibkr_host="127.0.0.1", ibkr_port=7497, client_id=1):
-      self.ib = IB()
-      self.ib.connect(ibkr_host, ibkr_port, clientId=client_id)
+### **2. Adding a New Package**
+- Install the desired package:
+  ```bash
+  pip install <package-name>
+  ```
+- Freeze the current environment and update `requirements.txt`:
+  ```bash
+  pip freeze > requirements.txt
+  ```
 
-   def place_order(self, symbol, side, quantity, price):
-      contract = Stock(symbol, "SMART", "USD")
-      order = MarketOrder("BUY" if side == "BUY" else "SELL", quantity)
-      trade = self.ib.placeOrder(contract, order)
+### **3. Virtual Environment Management**
+- Create a new virtual environment:
+  ```bash
+  python3 -m venv .venv
+  ```
+- Activate the virtual environment:
+  ```bash
+  source .venv/bin/activate  # On macOS/Linux
+  .\.venv\Scripts\activate  # On Windows
+  ```
 
-      if trade.orderStatus.status == "Filled":
-         return trade
-      else:
-         raise Exception("Order placement failed")
-
-```
-
----
-
-### **6. `main.py` (Application Entry Point)**
-Runs the bot, fetches market data, and places simulated trades.
-
-```python
-from config.config import IBKR_HOST, IBKR_PORT, CLIENT_ID
-from data.data_fetcher import DataFetcher
-from utils.logger import setup_logger
-
-logger = setup_logger()
-
-def main():
-   logger.info("Starting trading bot...")
-
-   try:
-      data_fetcher = DataFetcher(IBKR_HOST, IBKR_PORT, CLIENT_ID)
-      market_data = data_fetcher.fetch_live_data("AAPL")
-      logger.info(f"Market data fetched: {market_data}")
-   except Exception as e:
-      logger.error(f"Error fetching market data: {e}")
-
-if __name__ == "__main__":
-   main()
-
-```
+### **4. Updating Packages**
+- Upgrade a specific package:
+  ```bash
+  pip install --upgrade <package-name>
+  ```
+- Upgrade all packages:
+  ```bash
+  pip list --outdated | awk '{print $1}' | xargs -n1 pip install -U
+  ```
 
 ---
 
-### **7. `risk/risk_manager.py` (Risk Management)**
-Manages risk by applying stop-loss, take-profit, and position sizing strategies.
+# **How to Run the Project**
 
-```python
-class RiskManager:
-   def __init__(self, stop_loss_percent=0.05, take_profit_percent=0.1):
-      self.stop_loss_percent = stop_loss_percent
-      self.take_profit_percent = take_profit_percent
-
-   def evaluate_risk(self, entry_price, current_price):
-      stop_loss_price = entry_price * (1 - self.stop_loss_percent)
-      take_profit_price = entry_price * (1 + self.take_profit_percent)
-
-      if current_price <= stop_loss_price:
-         return "STOP_LOSS"
-      elif current_price >= take_profit_price:
-         return "TAKE_PROFIT"
-      else:
-         return "HOLD"
-```
-
----
-
-### **8. `utils/indicators.py` (Custom Indicators)**
-Implements trading indicators such as RSI and Bollinger Bands.
-
-```python
-class Indicators:
-   @staticmethod
-   def calculate_rsi(data, window=14):
-      delta = data['close'].diff()
-      gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
-      loss = (-delta.where(delta < 0, 0)).rolling(window=window).mean()
-      rs = gain / loss
-      rsi = 100 - (100 / (1 + rs))
-      return rsi
-
-   @staticmethod
-   def calculate_bollinger_bands(data, window=20, num_std_dev=2):
-      rolling_mean = data['close'].rolling(window=window).mean()
-      rolling_std = data['close'].rolling(window=window).std()
-      upper_band = rolling_mean + (rolling_std * num_std_dev)
-      lower_band = rolling_mean - (rolling_std * num_std_dev)
-      return rolling_mean, upper_band, lower_band
-```
-
----
-
-### **How to Run the Project**
-
-1. **Delete Old Virtual Environments:**
-   ```bash
-   rm -rf .venv venv
-   ```
-
-2. **Create a Virtual Environment:**
+1. **Create a Virtual Environment:**
    ```bash
    python3 -m venv .venv
    ```
 
-3. **Activate the Virtual Environment:**
+2. **Activate the Virtual Environment:**
    ```bash
    source .venv/bin/activate
    ```
 
-4. **Install Dependencies:**
+3. **Install Dependencies:**
    ```bash
    pip install -r requirements.txt
    ```
 
-5. **Run the Bot:**
+4. **Run the Bot:**
    ```bash
    python main.py
    ```
+
+---
+
+This documentation outlines the project's overall architecture, main modules, package management, and setup instructions, focusing on high-level design without code details.
 
