@@ -1,25 +1,32 @@
 # main.py
-from importlib import import_module
-from config.config import settings
+import logging
+from datetime import datetime
+from brokers.broker import Broker
+from logs.logger_manager import LoggerManager
+
+def execute():
+    broker = Broker()
+    logger = LoggerManager()
+
+    try:
+        broker.connect()
+        bars = broker.get_historical_data(
+            symbol='AAPL',
+            exchange='SMART',
+            currency='USD',
+            end_date='',
+            duration='8 D',
+            bar_size='1 min',
+            what_to_show='TRADES',
+            use_rth=True
+        )
+
+        current_date = datetime.now().strftime("%Y-%m-%d")
+        file_name = f"logs/AAPL_{current_date}_1m.csv"
+        logger.log_and_save_data(bars, file_name)
+        logging.info(f"Data saved to {file_name}")
+    except Exception as e:
+        logging.error(f"Error occurred: {e}")
 
 if __name__ == "__main__":
-    try:
-        # Dynamically load strategy class
-        StrategyClass = getattr(import_module(settings["STRATEGY_MODULE"]), settings["STRATEGY_CLASS"])
-        # Initialize the strategy and run the bot
-        strategy = StrategyClass()
-        # Main execution loop moved here
-        strategy.run_bot()
-
-    except Exception as e:
-        print(f"Failed to initialize: {e}")
-
-# from strategies.backtest_strategy import BacktestStrategy
-# from backtest.backtest_engine import BacktestEngine
-#
-# if __name__ == "__main__":
-#     strategy = BacktestStrategy()
-#     backtest_engine = BacktestEngine(strategy, data_file="data/historical_data.csv")
-#
-#     backtest_engine.load_data()  # Load historical prices
-#     backtest_engine.run_backtest()  # Start backtesting
+    execute()
