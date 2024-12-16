@@ -2,4 +2,16 @@ broker:
   host: "127.0.0.1"
   port: 7497
   client_id: 1
-  timeout: 60
+  timeout: 180
+  max_retries: 3
+
+request:
+#  watchlist: ["AAPL", "NVDA", "MSFT", "GOOGL"]
+  watchlist: ["AAPL"]
+  exchange: "SMART"
+  currency: "USD"
+  end_date: "20240701 23:59:59 UTC"
+  duration: "1 M"
+  bar_size: "1 min"
+  what_to_show: "TRADES"
+  use_rth: False

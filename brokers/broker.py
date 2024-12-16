@@ -2,6 +2,7 @@
 import yaml
 from ib_insync import IB, Stock
 
+
 class Broker:
     def __init__(self, config_file="config/config.yaml"):
         self.ib = IB()
@@ -25,12 +26,20 @@ class Broker:
 
     def get_historical_data(self, symbol, exchange, currency, end_date, duration, bar_size, what_to_show, use_rth):
         contract = Stock(symbol, exchange, currency)
-        bars = self.ib.reqHistoricalData(
-            contract,
-            endDateTime=end_date,
-            durationStr=duration,
-            barSizeSetting=bar_size,
-            whatToShow=what_to_show,
-            useRTH=use_rth
-        )
-        return bars
+
+        try:
+            bars = self.ib.reqHistoricalData(
+                contract,
+                endDateTime=end_date,
+                durationStr=duration,
+                barSizeSetting=bar_size,
+                whatToShow=what_to_show,
+                useRTH=use_rth,
+                timeout=self.timeout
+            )
+            if not bars:
+                raise ValueError("No historical data received.")
+            return bars
+
+        except Exception as e:
+            raise RuntimeError(f"Failed to fetch historical data: {e}")

@@ -16,21 +16,25 @@ class LoggerManager:
             print(f"Created directory: {log_dir}")
 
     def setup_logger(self):
-        # Correct logging format with timestamp and log level
-        logging.basicConfig(
-            level=logging.INFO,
-            format="%(asctime)s - %(levelname)s - %(message)s",
-            handlers=[
-                logging.FileHandler(self.log_file),
-                logging.StreamHandler()
-            ]
-        )
+        if not logging.getLogger().hasHandlers():
+            logging.basicConfig(
+                level=logging.INFO,
+                format="%(asctime)s - %(levelname)s - %(message)s",
+                handlers=[
+                    logging.FileHandler(self.log_file),
+                    logging.StreamHandler()
+                ]
+            )
 
     @staticmethod
-    def log_and_save_data(bars, csv_file):
-        with open(csv_file, 'w', newline='') as csvfile:
+    def log_and_save_data(bars, csv_file, append=False):
+        mode = 'a' if append and os.path.exists(csv_file) else 'w'
+
+        with open(csv_file, mode, newline='') as csvfile:
             writer = csv.writer(csvfile)
-            writer.writerow(["Date", "Time", "Open", "High", "Low", "Close", "Volume"])
+
+            if mode == 'w':
+                writer.writerow(["Date", "Time", "Open", "High", "Low", "Close", "Volume"])
 
             for bar in bars:
                 date = bar.date.strftime("%Y-%m-%d")
