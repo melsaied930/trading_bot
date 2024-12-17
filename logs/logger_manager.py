@@ -1,13 +1,14 @@
 # logs/logger_manager.py
-import logging
 import csv
+import logging
 import os
+
 
 class LoggerManager:
     def __init__(self, log_file="logs/bot.log"):
         self.log_file = log_file
         self.ensure_log_directory()
-        self.setup_logger()
+        self.logger = self.setup_logger()  # Corrected attribute initialization
 
     def ensure_log_directory(self):
         log_dir = os.path.dirname(self.log_file)
@@ -16,15 +17,22 @@ class LoggerManager:
             print(f"Created directory: {log_dir}")
 
     def setup_logger(self):
-        if not logging.getLogger().hasHandlers():
-            logging.basicConfig(
-                level=logging.INFO,
-                format="%(asctime)s - %(levelname)s - %(message)s",
-                handlers=[
-                    logging.FileHandler(self.log_file),
-                    logging.StreamHandler()
-                ]
-            )
+        logger = logging.getLogger(__name__)
+        if not logger.hasHandlers():
+            logger.setLevel(logging.INFO)
+            formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+
+            # File handler
+            file_handler = logging.FileHandler(self.log_file)
+            file_handler.setFormatter(formatter)
+            logger.addHandler(file_handler)
+
+            # Console handler
+            console_handler = logging.StreamHandler()
+            console_handler.setFormatter(formatter)
+            logger.addHandler(console_handler)
+
+        return logger
 
     @staticmethod
     def log_and_save_data(bars, csv_file, append=False):
@@ -42,5 +50,5 @@ class LoggerManager:
                 row = [date, time, bar.open, bar.high, bar.low, bar.close, bar.volume]
 
                 writer.writerow(row)
-                logging.info(f"{time} | Open: {bar.open} | High: {bar.high} | "
+                logging.info(f"Date: {date} | Time: {time} | Open: {bar.open} | High: {bar.high} | "
                              f"Low: {bar.low} | Close: {bar.close} | Volume: {bar.volume}")
