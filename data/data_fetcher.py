@@ -1,72 +1,53 @@
-# from ib_insync import IB, Stock
-# import time
-#
-# class DataFetcher:
-#     def __init__(self, ibkr_host="127.0.0.1", ibkr_port=7497, client_id=None):
-#         self.ib = IB()
-#         if client_id is None:
-#             client_id = int(time.time() % 10000)  # Use a dynamic client ID
-#         print(f"Connecting with clientId: {client_id}")
-#
-#         if not self.ib.connect(ibkr_host, ibkr_port, clientId=client_id, timeout=60):
-#             raise ConnectionError("IBKR API connection failed.")
-#
-#     def fetch_live_data(self, symbol="AAPL"):
-#         contract = Stock(symbol, "SMART", "USD")
-#         self.ib.qualifyContracts(contract)
-#
-#         market_data = self.ib.reqMktData(contract, "", False, False)
-#         self.ib.sleep(1)
-#
-#         if market_data.close or market_data.last:
-#             price = market_data.close or market_data.last
-#             return {
-#                 "symbol": symbol,
-#                 "price": price,
-#                 "bid": market_data.bid,
-#                 "ask": market_data.ask,
-#                 "time": market_data.time
-#             }
-#         else:
-#             raise ValueError(f"No market data available for {symbol}")
+# data/data_fetcher.py
 
-
-
-
-
-
-
-
-import time
-import random
+from brokers.broker import Broker
+import pandas as pd
+from pathlib import Path
+from utils.config_loader import load_config
 
 
 class DataFetcher:
-    def __init__(self):
-        self.last_fetch_time = 0
-        self.fetch_interval = 30  # Fetch data every 30 seconds
+    def __init__(self, config_file: str | Path = None):
+        base_dir = Path(__file__).parent
+        config_file = config_file or base_dir / "../config/config.yaml"
 
-    def fetch_live_data(self, stock_symbol):
-        """Fetch simulated live market data every 30 seconds."""
-        current_time = time.time()
+        self.broker: Broker = Broker(config_file)
+        self.data_config: dict = load_config(config_file)['data_fetcher']
+        self.broker.connect()
 
-        # Check if 30 seconds have passed since the last fetch
-        if current_time - self.last_fetch_time >= self.fetch_interval:
-            self.last_fetch_time = current_time
+    def download_historical_data(self) -> pd.DataFrame:
+        try:
+            bars = self.broker.get_historical_data(
+                symbol=self.data_config['default_symbol'],
+                exchange=self.data_config['exchange'],
+                currency=self.data_config['currency'],
+                end_date=self.data_config['end_date'],
+                duration=self.data_config['duration'],
+                bar_size=self.data_config['bar_size'],
+                what_to_show=self.data_config['what_to_show'],
+                use_rth=self.data_config['use_rth']
+            )
 
-            # Simulate fetching data
-            last_close = round(random.uniform(150, 180), 2)
-            current_open = round(last_close + random.uniform(-2, 2), 2)
+            if not bars:
+                print(f"No historical data for {self.data_config['default_symbol']}.")
+                return pd.DataFrame()
 
-            # Log fetched data
-            print(f"[DataFetcher] Fetched for {stock_symbol} - Last Close: {last_close}, Current Open: {current_open}")
+            df = pd.DataFrame([bar.__dict__ for bar in bars])
+            print(f"Downloaded {len(df)} records for {self.data_config['default_symbol']}.")
+            return df
 
-            return {
-                "stock_symbol": stock_symbol,
-                "last_close": last_close,
-                "current_open": current_open
-            }
-        else:
-            # Indicate that data fetching is not performed yet
-            print(f"[DataFetcher] Waiting for next fetch interval...")
-            return {}
+        except Exception as e:
+            print(f"Error downloading historical data: {e}")
+            return pd.DataFrame()
+
+if __name__ == "__main__":
+    data_fetcher = DataFetcher()
+    historical_data = data_fetcher.download_historical_data()
+
+    if not historical_data.empty:
+        output_dir = Path(__file__).parent / data_fetcher.data_config['output_dir']
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        output_file = output_dir / f"{data_fetcher.data_config['default_symbol']}_historical_data.csv"
+        historical_data.to_csv(str(output_file), index=False)
+        print(f"Data saved to {output_file}.")

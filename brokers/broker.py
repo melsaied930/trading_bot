@@ -1,31 +1,27 @@
 # brokers/broker.py
-import yaml
-from ib_insync import IB, Stock
 
+from ib_insync import IB, Stock
 from logs.logger_manager import LoggerManager
+from utils.config_loader import load_config
+from pathlib import Path
 
 
 class Broker:
-    def __init__(self, config_file="config/config.yaml"):
-        self.ib = IB()
-        self.host = None
-        self.port = None
-        self.client_id = None
-        self.timeout = None
+    def __init__(self, config_file: str | Path = None):
+        base_dir = Path(__file__).parent
+        config_file = config_file or base_dir / "../config/config.yaml"
+
+        self.ib: IB = IB()
         self.logger = LoggerManager()
-        self.load_config(config_file)
+        self.config: dict = load_config(config_file)
+        self.host: str = self.config['broker'].get('host', "")
+        self.port: int = self.config['broker'].get('port', 0)
+        self.client_id: int = self.config['broker'].get('client_id', 0)
+        self.timeout: int = self.config['broker'].get('timeout', 0)
 
-    def load_config(self, config_file):
-        with open(config_file, "r") as file:
-            config = yaml.safe_load(file)
-            broker_config = config['broker']
-            self.host = broker_config.get('host')
-            self.port = broker_config.get('port')
-            self.client_id = broker_config.get('client_id')
-            self.timeout = broker_config.get('timeout')
-            self.logger.logger.info(f"Broker configuration loaded: {broker_config}")
+        self.logger.logger.info(f"Broker configuration loaded: {self.config['broker']}")
 
-    def connect(self):
+    def connect(self) -> None:
         try:
             self.ib.connect(self.host, self.port, self.client_id, self.timeout)
             self.logger.logger.info(f"Connected to IBKR at {self.host}:{self.port} with client ID {self.client_id}.")
@@ -33,7 +29,7 @@ class Broker:
             self.logger.logger.error(f"Failed to connect: {e}")
             raise
 
-    def get_historical_data(self, symbol, exchange, currency, end_date, duration, bar_size, what_to_show, use_rth):
+    def get_historical_data(self, symbol: str, exchange: str, currency: str, end_date: str, duration: str, bar_size: str, what_to_show: str, use_rth: bool):
         contract = Stock(symbol, exchange, currency)
         self.logger.logger.info(f"Requesting historical data for {symbol} from {exchange} in {currency}...")
 

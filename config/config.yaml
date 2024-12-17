@@ -1,3 +1,5 @@
+#  config/config.yaml
+
 broker:
   host: "127.0.0.1"
   port: 7497
@@ -5,13 +7,47 @@ broker:
   timeout: 180
   max_retries: 3
 
-request:
-#  watchlist: ["AAPL", "NVDA", "MSFT", "GOOGL"]
-  watchlist: ["AAPL"]
+data_fetcher:
+  default_symbol: "AAPL"
   exchange: "SMART"
   currency: "USD"
-  end_date: "20241201 23:59:59 UTC"
-  duration: "1 M"
+  end_date: ""
+  duration: "1 D"
   bar_size: "1 min"
   what_to_show: "TRADES"
-  use_rth: False
+  use_rth: false
+  output_dir: "data"
+
+## broker.py
+#broker:
+#  host: "127.0.0.1"
+#  port: 7497
+#  client_id: 1
+#  timeout: 180
+#  max_retries: 3
+#
+## data_fetcher.py
+#watchlist:
+#  - "AAPL"
+#  - "MSFT"
+#  - "NVDA"
+#
+#exchange: "SMART"
+#currency: "USD"
+#bar_size: "1 min"
+#what_to_show: "TRADES"
+#use_rth: False
+#days_to_fetch: 65
+#fetch_interval_days: 30
+
+
+#request:
+##  watchlist: ["AAPL", "NVDA", "MSFT", "GOOGL"]
+#  watchlist: ["AAPL"]
+#  exchange: "SMART"
+#  currency: "USD"
+#  end_date: "20241201 23:59:59 UTC"
+#  duration: "1 M"
+#  bar_size: "1 min"
+#  what_to_show: "TRADES"
+#  use_rth: False
