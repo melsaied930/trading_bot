@@ -65,15 +65,15 @@ def execute():
     broker = Broker()
     logger = LoggerManager()
 
-    # watchlist = ["AAPL", "MSFT", "NVDA"]  # Symbols to request
-    watchlist = ["AAPL"]  # Symbols to request
+    watchlist = ["AAPL", "MSFT", "NVDA"]  # Symbols to request
+    # watchlist = ["AAPL"]  # Symbols to request
     exchange = "SMART"
     currency = "USD"
     bar_size = "1 min"
     what_to_show = "TRADES"
     use_rth = False
 
-    combined_file_name = "logs/combined_data.csv"
+    combined_file_name = "logs/data3/combined_data.csv"
 
     try:
         broker.connect()
@@ -81,7 +81,7 @@ def execute():
         for symbol in watchlist:
             # Start 2 years back from the current date
             current_date = datetime.now()
-            start_date = current_date - timedelta(days=730)
+            start_date = current_date - timedelta(days=65)
 
             while start_date < current_date:
                 # Calculate end date for each month
@@ -98,7 +98,7 @@ def execute():
                     exchange=exchange,
                     currency=currency,
                     end_date=end_date_str,
-                    duration="1 M",  # Correct duration format
+                    duration="1 M",
                     bar_size=bar_size,
                     what_to_show=what_to_show,
                     use_rth=use_rth

@@ -24,7 +24,7 @@ class Broker:
     def connect(self) -> None:
         try:
             self.ib.connect(self.host, self.port, self.client_id, self.timeout)
-            self.logger.logger.info(f"Connected to IBKR at {self.host}:{self.port} with client ID {self.client_id}.")
+            self.logger.logger.info(f"Connected to Broker at {self.host}:{self.port} with client ID {self.client_id}.")
         except Exception as e:
             self.logger.logger.error(f"Failed to connect: {e}")
             raise
